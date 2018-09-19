@@ -1,3 +1,5 @@
+This program is designed to allow a user to perform basic cryptanalysis on text that is encrypted using a simple substition cipher.
+
 Compile the program by typing 'make' into the command line. Then run the program by typing './substitutioncracker'.
 
 1.) For displaying the frequency analysis, the program should automatically output all the characters in the ciphertext in order of decreasing frequency alongside the number of times each each of them appears.
