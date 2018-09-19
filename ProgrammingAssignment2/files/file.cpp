@@ -1,4 +1,6 @@
 #include "file.h"
+#include <bitset>
+#include <cstdio>
 
 //default constructor
 file::file(uint64_t key, uint64_t IV) : des(key, IV)
@@ -22,27 +24,49 @@ int file::operation(string inputFile, string outputFile, bool mode)
 {
     ifstream readFile;
     ofstream writeFile;
-    uint64_t buff;
+    uint64_t buff = 0;
     
     readFile.open(inputFile, ios::binary | ios::in | ios::ate);
     writeFile.open(outputFile, ios::binary | ios::out);
     
+    if(!readFile)
+    {
+        cout << "Error: Input file not found." << endl;
+        return 0;
+    }
+    
     uint64_t size = readFile.tellg();
     readFile.seekg(0, ios::beg);
     
+    char * c = new char[1];
+    unsigned char character;
+    uint8_t cha;
     uint64_t block = size / 8;
-    if(mode) block --;
+    //if(mode) block --;
     
     for(uint64_t i = 0; i < block; i++)
     {
-        readFile.read((char*) &buff, 8);
+    	for(int j = 0; j < 8; j++)
+    	{
+                buff = buff << 8;
+                readFile.read(c,1);
+                character = *c;
+                cha = (unsigned int) character;
+                buff = buff | (((uint64_t) cha) & 0x00000000000000ff);
+    	}
         
         if(mode)
             buff = des.CBCdecrypt(buff); //decrypt
         else
             buff = des.CBCencrypt(buff); //encrypt
         
-        writeFile.write((char*) &buff, 8);
+    	for(int j = 7; j >= 0; j--)
+    	{
+                cha = (buff >> (j * 8)) & 0x00000000000000ff;
+                character = (char) cha;
+                c[0] = character;
+                writeFile.write(c,1);
+    	}
     }
     
     //if encrypting then add necessary padding to message
@@ -50,41 +74,17 @@ int file::operation(string inputFile, string outputFile, bool mode)
     {
         uint8_t pad = 8 - (size % 8);
         
-        if(pad == 0)
-            pad = 8;
+        if(pad == 8)
+            pad = 0;
         
         buff = (uint64_t) 0;
-        if(pad != 8)
-            readFile.read((char*) &buff, 8 - pad);
-        
-        uint8_t shift = pad * 8;
-        buff = buff << shift;
-        buff = buff | ((uint64_t) 0x0000000000000001 << (shift - 1));
-        
-        buff = des.CBCencrypt(buff);
-        writeFile.write((char*) &buff, 8);
+        c[0] = 0;
+        for(uint8_t i = 0; i < pad; i++)
+        {
+            writeFile.write(c,1);
+        }
     }
     
-    //if decrypting then ignore padding and decrypt final line
-    else
-    {
-        readFile.read((char*) &buff, 8);
-        buff = des.CBCdecrypt(buff);
-        
-        uint8_t pad = 0;
-        
-        while(!(buff & 0x00000000000000ff))
-        {
-            buff = buff >> 8;
-            pad++;
-        }
-        
-        buff = buff >> 8;
-        pad++;
-        
-        if(pad != 8)
-            writeFile.write((char*) &buff, 8 - pad);
-    }
     
     readFile.close();
     writeFile.close();

@@ -1,6 +1,7 @@
 #include "file.h"
 #include <iostream>
 #include <random>
+#include <string>
 using namespace std;
 
 //function for calculating a random number
@@ -21,24 +22,60 @@ int main(int argc, char **argv)
 {
     string choice = argv[1];
     string inputFile, outputFile;
+    string temp;
     uint64_t key;
     uint64_t IV;
+    bool setK = false;
+    bool setIV = false;
+    bool setIn = false;
+    bool setOut = false;
     
-    //in the case that key and iv values are given
-    if(argc > 4)
+    for(int i = 0; i < argc; i++)
     {
-        inputFile = argv[4];
-        outputFile = argv[5];
-        key = strtoull(argv[2], nullptr, 16);
-        IV = strtoull(argv[3], nullptr, 16);
+        temp = argv[i];
+        if(temp == "-K")
+        {
+            temp = argv[i + 1];
+            key = strtoull(temp.c_str(), nullptr, 16);
+            setK = true;
+        }
+        else if(temp == "-IV")
+        {
+            temp = argv[i + 1];
+            IV = strtoull(temp.c_str(), nullptr, 16);
+            setIV = true;
+        }
+        else if(temp == "-i")
+        {
+            temp = argv[i + 1];
+            inputFile = temp;
+            setIn = true;
+        }
+        else if(temp == "-o")
+        {
+            temp = argv[i + 1];
+            outputFile = temp;
+            setOut = true;
+        }
     }
-    //in the case that no key or iv values are given
-    else
+    
+    if(!setK)
     {
-        inputFile = argv[2];
-        outputFile = argv[3];
         key = random_64bit();
+    }
+    if(!setIV)
+    {
         IV = random_64bit();
+    }
+    if(!setIn)
+    {
+        cout << "Error: No input file given." << endl;
+        return 0;
+    }
+    if(!setOut)
+    {
+        cout << "Error: No output file given." << endl;
+        return 0;
     }
     
     //outputs key and iv for the user
