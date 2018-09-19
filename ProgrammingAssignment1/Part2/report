@@ -1,0 +1,16 @@
+Programming Project 1
+Part 2
+--Devon Miller
+
+1.) When a function is called in the Intel x86 architecture, the address pointing to the next instruction in memory is pushed to the stack. When the function is done executing, this address is popped off the stack and the program goes to wherever this address is pointing to. The %rip register stores the address of whatever instruction is next to be executed and it is continually incremented after each instruction is performed. The %rsp register stores the address of whatever is at the top of the stack which is essentially the address of whatever element was last added to the stack. The %rbp register is set equal to the %rsp register whenever a function is called and it is used in combination with offset values to access both local variables and function parameters.
+
+2.) Basically what happens during a buffer overflow attack is a user inputs a predetermined string into a program. This string is designed in such a way that it essentially overflows past the maximum amount of bytes that the data type is allowed to hold and appended to the end of the string is some form of malicious code. Sometimes it is custom code and sometimes it's simply an address that points to another point in the program memory (usually to a place that the user should not have access to).
+
+3.) The problem with bof.c is that the gets command simply takes all the characters in the given string and puts them into program memory even if there are more than allowed. Alternative commands circumvent this by halting the reading process when the value starts to leak into program memory. Additionally, modern day systems check to make sure addresses are not being altered during runtime and terminate processes if any sort of manipulation is discovered. We intentionally circumvented this feature for the purposes of this project.
+
+4.) I didn't really use gdb for this project. All I really did was find out how many bytes away from the %rbp register the buffer array was, inputted random characters to get to that point, and then appended the memory address of the success function (in little-endian form).
+
+5.) What I used to circumvent the program:
+	printf "aaaaaaaaaaaaaaaaaaaa\xf7\x84\x04\x08" | ./bof
+
+
