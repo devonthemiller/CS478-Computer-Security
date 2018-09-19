@@ -29,7 +29,7 @@ int file::operation(string inputFile, string outputFile, bool mode)
     readFile.open(inputFile, ios::binary | ios::in | ios::ate);
     writeFile.open(outputFile, ios::binary | ios::out);
     
-    if(!readFile)
+    if(readFile.eof())
     {
         cout << "Error: Input file not found." << endl;
         return 0;
@@ -44,9 +44,27 @@ int file::operation(string inputFile, string outputFile, bool mode)
     uint64_t block = size / 8;
     //if(mode) block --;
     
-    for(uint64_t i = 0; i < block; i++)
+    for(uint64_t i = 0; i < block + 1; i++)
     {
-    	for(int j = 0; j < 8; j++)
+    	if(i == block)
+    	{
+            for(uint8_t j = 0; j < (size % 8); j++)
+            {
+                buff = buff << 8;
+                readFile.read(c,1);
+                character = *c;
+                cha = (unsigned int) character;
+                buff = buff | (((uint64_t) cha) & 0x00000000000000ff);
+            }
+
+            uint8_t pad = 8 - (size % 8);
+            for(int j = 0; j < pad; j++)
+            {
+                buff = buff << 8;
+                buff = buff | (((uint64_t) pad) & 0x00000000000000ff);
+            }
+    	}
+    	else for(int j = 0; j < 8; j++)
     	{
                 buff = buff << 8;
                 readFile.read(c,1);
@@ -68,23 +86,6 @@ int file::operation(string inputFile, string outputFile, bool mode)
                 writeFile.write(c,1);
     	}
     }
-    
-    //if encrypting then add necessary padding to message
-    if(mode == false)
-    {
-        uint8_t pad = 8 - (size % 8);
-        
-        if(pad == 8)
-            pad = 0;
-        
-        buff = (uint64_t) 0;
-        c[0] = 0;
-        for(uint8_t i = 0; i < pad; i++)
-        {
-            writeFile.write(c,1);
-        }
-    }
-    
     
     readFile.close();
     writeFile.close();
