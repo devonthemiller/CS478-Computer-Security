@@ -1,4 +1,5 @@
-This program is a complete implementation of the DES encryption/decryption algorithm which uses cipher block chaining. This implementation is fully compatible with the openSSL implementation of DES in CBC mode.
+This program is a complete implementation of the DES encryption/decryption algorithm using cipher block chaining. 
+This implementation is fully compatible with the openSSL implementation of DES in CBC mode.
 
 Compile by entering the "files" directory and typing "make" in command line.
 Input should follow the form:
